@@ -1,0 +1,86 @@
+{
+  "name": "pulsar-live-server",
+  "displayName": "Pulsar Live Server",
+  "description": "Blazing-fast dev server with instant live reload, CSS hot-injection, live-as-you-type updates, HTTPS, proxy, SPA mode & one-click mobile testing.",
+  "version": "1.0.0",
+  "publisher": "your-publisher-id",
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "galleryBanner": { "color": "#0B1020", "theme": "dark" },
+  "engines": { "vscode": "^1.75.0" },
+  "categories": ["Other", "Debuggers", "Programming Languages"],
+  "keywords": ["live server", "live reload", "hot reload", "dev server", "html", "css", "https", "proxy", "spa", "preview", "pulsar"],
+  "repository": { "type": "git", "url": "https://github.com/your-username/pulsar-live-server.git" },
+  "bugs": { "url": "https://github.com/your-username/pulsar-live-server/issues" },
+  "homepage": "https://github.com/your-username/pulsar-live-server#readme",
+  "main": "./extension.js",
+  "extensionKind": ["workspace"],
+  "activationEvents": ["onStartupFinished"],
+  "capabilities": {
+    "virtualWorkspaces": false,
+    "untrustedWorkspaces": { "supported": false, "description": "Pulsar runs a local web server and serves your files." }
+  },
+  "scripts": {
+    "test": "node test/smoke.js",
+    "check": "node --check extension.js && node --check src/server.js",
+    "package": "npx --yes @vscode/vsce package --no-dependencies"
+  },
+  "contributes": {
+    "commands": [
+      { "command": "pulsar.start", "title": "Start Server", "category": "Pulsar" },
+      { "command": "pulsar.stop", "title": "Stop Server", "category": "Pulsar" },
+      { "command": "pulsar.toggle", "title": "Toggle Server", "category": "Pulsar" },
+      { "command": "pulsar.openFile", "title": "Open with Pulsar Live Server", "category": "Pulsar" },
+      { "command": "pulsar.showUrls", "title": "Show URLs (Local & Network / Mobile)", "category": "Pulsar" },
+      { "command": "pulsar.reloadAll", "title": "Force Reload All Browsers", "category": "Pulsar" },
+      { "command": "pulsar.showLog", "title": "Show Log", "category": "Pulsar" }
+    ],
+    "menus": {
+      "explorer/context": [
+        { "command": "pulsar.openFile", "when": "resourceExtname =~ /\\.(html?|svg|xhtml|php)$/", "group": "navigation@1" }
+      ],
+      "editor/context": [
+        { "command": "pulsar.openFile", "when": "resourceExtname =~ /\\.(html?|svg|xhtml|php)$/", "group": "navigation@1" }
+      ],
+      "editor/title": [
+        { "command": "pulsar.openFile", "when": "resourceExtname =~ /\\.(html?|xhtml)$/", "group": "navigation@1" }
+      ]
+    },
+    "keybindings": [
+      { "command": "pulsar.toggle", "key": "ctrl+alt+l", "mac": "cmd+alt+l" },
+      { "command": "pulsar.openFile", "key": "ctrl+alt+o", "mac": "cmd+alt+o", "when": "editorTextFocus" },
+      { "command": "pulsar.showUrls", "key": "ctrl+alt+u", "mac": "cmd+alt+u" }
+    ],
+    "configuration": {
+      "title": "Pulsar Live Server",
+      "properties": {
+        "pulsar.port": { "type": "number", "default": 5500, "scope": "resource", "description": "Server port. If busy, the next free port is used. Use 0 for random." },
+        "pulsar.root": { "type": "string", "default": "/", "scope": "resource", "description": "Server root relative to the workspace folder (e.g. /dist or /public)." },
+        "pulsar.host": { "type": "string", "default": "localhost", "enum": ["localhost", "127.0.0.1", "0.0.0.0"], "scope": "resource", "description": "Host to bind. Use 0.0.0.0 to allow other devices on your Wi-Fi (phones, tablets) to connect." },
+        "pulsar.browser": { "type": "string", "default": "default", "scope": "resource", "description": "default | chrome | firefox | edge | brave | opera | safari | or a custom executable/app name." },
+        "pulsar.browserArgs": { "type": "array", "items": { "type": "string" }, "default": [], "scope": "resource", "description": "Extra command-line arguments for the browser (e.g. --incognito)." },
+        "pulsar.openOnStart": { "type": "boolean", "default": true, "scope": "resource", "description": "Open the browser automatically when the server starts." },
+        "pulsar.reloadOnType": { "type": "boolean", "default": false, "scope": "resource", "description": "Live update while typing, without saving the file." },
+        "pulsar.debounce": { "type": "number", "default": 80, "scope": "resource", "description": "Milliseconds to wait before reloading after a change." },
+        "pulsar.cssInjection": { "type": "boolean", "default": true, "scope": "resource", "description": "Hot-swap CSS without a full page reload." },
+        "pulsar.ignoreFiles": { "type": "array", "items": { "type": "string" }, "default": ["**/.git/**", "**/node_modules/**", "**/.vscode/**"], "scope": "resource", "description": "Glob patterns ignored by change detection." },
+        "pulsar.injectTag": { "type": "string", "default": "</body>", "scope": "resource", "description": "Tag before which the live-reload client is injected (falls back to end of document)." },
+        "pulsar.spa": { "type": "boolean", "default": false, "scope": "resource", "description": "SPA mode: unknown routes fall back to index.html (React/Vue/Angular routers)." },
+        "pulsar.directoryListing": { "type": "boolean", "default": true, "scope": "resource", "description": "Show a directory listing when a folder has no index.html." },
+        "pulsar.cors": { "type": "boolean", "default": false, "scope": "resource", "description": "Enable CORS headers (Access-Control-Allow-Origin: *)." },
+        "pulsar.headers": { "type": "object", "default": {}, "scope": "resource", "description": "Custom response headers, e.g. {\"X-Frame-Options\": \"DENY\"}." },
+        "pulsar.https": {
+          "type": "object", "scope": "resource",
+          "default": { "enable": false, "cert": "", "key": "", "passphrase": "" },
+          "description": "HTTPS settings. Provide absolute paths to your certificate and key (e.g. generated with mkcert)."
+        },
+        "pulsar.proxy": {
+          "type": "array", "scope": "resource", "default": [],
+          "items": { "type": "object", "properties": { "path": { "type": "string" }, "target": { "type": "string" } }, "required": ["path", "target"] },
+          "description": "Proxy rules, e.g. [{\"path\": \"/api\", \"target\": \"http://localhost:3000\"}]."
+        },
+        "pulsar.notifications": { "type": "boolean", "default": true, "scope": "resource", "description": "Show start/stop notifications." }
+      }
+    }
+  }
+}
